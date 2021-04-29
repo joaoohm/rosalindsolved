@@ -1,43 +1,73 @@
-def findProfileMatrix(dna):
+def findProfileMatrix(dnaM):
 
-	for j in range(len(dna)):
-		for i in range(len(dna[0])):
-			if dna[j][i] == 'A':
-				conA[i] += 1
-			elif dna[j][i] == 'C':
-				conC[i] += 1
-			elif dna[j][i] == 'G':
-				conG[i] += 1
-			elif dna[j][i] == 'T':
-				conT[i] += 1 
+	#Defining the profile matrix
+	pMatrix = [[0]*len(dnaM[0]), [0]*len(dnaM[0]), [0]*len(dnaM[0]), [0]*len(dnaM[0])]
 
-	conA = map(str, conA)
-	conC = map(str, conC)
-	conG = map(str, conG)
-	conT = map(str, conT)
+	#Counting ocurrences of a nt in dnaM and populating pMatrix
+	for j in range(len(dnaM)):
+		for i in range(len(dnaM[0])):
+			if dnaM[j][i] == 'A':
+				pMatrix[0][i] += 1
+			elif dnaM[j][i] == 'C':
+				pMatrix[1][i] += 1
+			elif dnaM[j][i] == 'G':
+				pMatrix[2][i] += 1
+			elif dnaM[j][i] == 'T':
+				pMatrix[3][i] += 1 
 
-	return 'A: ' + ' '.join(conA) + '\n' + 'C: ' + ' '.join(conC) + '\n' + 'G: ' + ' '.join(conG) + '\n' + 'T: ' + ' '.join(conT)
+	return pMatrix
+
+def findConsensusSequence(pMatrix):
+
+	cSeq = []
+
+	#Determining the highest value in every column of pMatrix using nested conditionals. There's probably an easier way to do this.
+	for i in range(len(pMatrix[0])):
+		if pMatrix[0][i] > pMatrix[1][i]:
+			if pMatrix[0][i] > pMatrix[2][i]:
+				if pMatrix[0][i] > pMatrix[3][i]:
+					cSeq.append('A')
+				else:
+					cSeq.append('T')
+			elif pMatrix[2][i] > pMatrix [3][i]:
+				cSeq.append('G')
+			else:
+				cSeq.append('T')
+		elif pMatrix[1][i] > pMatrix [2][i]:
+			if pMatrix[1][i] > pMatrix [3][i]:
+				cSeq.append('C')
+			else:
+				cSeq.append('T')
+		elif pMatrix[2][i] > pMatrix [3][i]:
+			cSeq.append('G')
+		else:
+			cSeq.append('T')
+
+	return cSeq
 
 
 i = open('rosalind_cons.txt', 'r')
 o = open('rosalind_cons_out.txt', 'w')
 
-x = 1
-stringsDNA = []
 
+#Collecting the DNA sequences in a matrix
+x = 1
+dnaMatrix = []
+
+#For this to work, I had to remove all mid-sequence line breaks on the input file. 
 for s in i:
     if x % 2 == 0:
-    	stringsDNA.append(s.strip('\n'))
+    	dnaMatrix.append(s.strip('\n'))
     x += 1
 
-conA = [0]*len(stringsDNA[0])
-conC = [0]*len(stringsDNA[0])
-conG = [0]*len(stringsDNA[0])
-conT = [0]*len(stringsDNA[0])
+A = findProfileMatrix(dnaMatrix)
 
+o.write(''.join(findConsensusSequence(A))+'\n')
+o.write('A:' + ' '.join(['{:2}'.format(item) for item in A[0]])
+		+ '\nC:' + ' '.join(['{:2}'.format(item) for item in A[1]])
+		+ '\nG:' + ' '.join(['{:2}'.format(item) for item in A[2]])
+		+ '\nT:' + ' '.join(['{:2}'.format(item) for item in A[3]]))
+ 
 
-o.write(str(findProfileMatrix(stringsDNA)))
-
-       
 i.close()
 o.close() 
